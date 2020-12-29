@@ -1834,7 +1834,7 @@ int	sh_ioctl(int fd, int cmd, void* val, int sz)
 	}
 	else
 	{
-		Sflong_t l = (Sflong_t)val;
+		Sflong_t l = (Sflong_t)(uintptr_t)val;
 		if(sizeof(val)==sizeof(long))
 		{
 			while((r=ioctl(fd,cmd,(unsigned long)l)) < 0 && errno==EINTR)

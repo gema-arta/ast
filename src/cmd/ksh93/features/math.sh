@@ -198,7 +198,7 @@ do	eval x='$'_lib_${name}l y='$'_lib_${name} r='$'TYPE_${name} a='$'ARGS_${name}
 				'')	;;
 				*)	r=int R=1
 					echo "static $r $F(Sfdouble_t a1) { $r q = $f(a1); return $y; }"
-					tab="$tab$nl$ht\"\\0${R}${a}${name}\",$ht(Math_f)${F},"
+					tab="$tab$nl$ht\"\\0${R}${a}${name}\",$ht(Math_f)(uintptr_t)${F},"
 					break
 					;;
 				esac
@@ -230,7 +230,7 @@ do	eval x='$'_lib_${name}l y='$'_lib_${name} r='$'TYPE_${name} a='$'ARGS_${name}
 			case $_it_links_ in
 			1)	code="$code)$body"
 				echo "$code"
-				tab="$tab$nl$ht\"\\0${R}${a}${name}\",$ht(Math_f)${F},"
+				tab="$tab$nl$ht\"\\0${R}${a}${name}\",$ht(Math_f)(uintptr_t)${F},"
 				;;
 			esac
 			;;
@@ -291,7 +291,7 @@ do	eval x='$'_lib_${name}l y='$'_lib_${name} r='$'TYPE_${name} a='$'ARGS_${name}
 		*=*)	continue
 			;;
 		esac
-		tab="$tab$nl$ht\"\\0${R}${a}${x}\",$ht(Math_f)$f,"
+		tab="$tab$nl$ht\"\\0${R}${a}${x}\",$ht(Math_f)(uintptr_t)$f,"
 	done
 done
 tab="$tab$nl$ht\"\",$ht$ht(Math_f)0"
