@@ -591,6 +591,7 @@ int sh_readline(register Shell_t *shp,char **names, volatile int fd, int flags,s
 
 		    case S_ERR:
 			cp++;
+			/* FALLTHROUGH */
 		    case S_EOF:
 			/* check for end of buffer */
 			if(val && *val)

@@ -1206,6 +1206,7 @@ retry:
 		}
 		exscript(shp,path,argv,envp);
 #ifndef apollo
+		/* FALLTHROUGH */
 	    case EACCES:
 	    {
 		struct stat statb;
@@ -1219,9 +1220,9 @@ retry:
 #endif
 		}
 	    }
-		/* FALL THROUGH */
 #endif /* !apollo */
 #ifdef ENAMETOOLONG
+		/* FALLTHROUGH */
 	    case ENAMETOOLONG:
 #endif /* ENAMETOOLONG */
 #if !SHOPT_SUID_EXEC
@@ -1244,6 +1245,7 @@ retry:
 				goto retry;
 			return(pid);
 		}
+		/* FALLTHROUGH */
 	    default:
 		errormsg(SH_DICT,ERROR_system(ERROR_NOEXEC),e_exec,path);
 	}

@@ -844,6 +844,7 @@ static int cntlmode(Vi_t *vp)
 			case BAD:
 				/*** no match ***/
 					ed_ringbell();
+				/* FALLTHROUGH */
 
 			default:
 				if( vp->u_column == INVALID )
@@ -966,6 +967,7 @@ static int cntlmode(Vi_t *vp)
 			if(vp->repeat_set==0)
 				goto vcommand;
 #endif /* KSHELL */
+			/* FALLTHROUGH */
 
 		case 'G':		/** goto command repeat **/
 			if(vp->repeat_set==0)
@@ -1024,6 +1026,7 @@ static int cntlmode(Vi_t *vp)
 				}
 				refresh(vp,INPUT);
 			}
+			/* FALLTHROUGH */
 
 		case '\n':		/** send to shell **/
 #if SHOPT_EDPREDICT
@@ -1058,6 +1061,7 @@ static int cntlmode(Vi_t *vp)
 					continue;
 				}
 			}
+			/* FALLTHROUGH */
 		default:
 		ringbell:
 			ed_ringbell();
@@ -1532,6 +1536,7 @@ static void getline(register Vi_t* vp,register int mode)
 			if( cur_virt != INVALID )
 				continue;
 			vp->addnl = 0;
+			/* FALLTHROUGH */
 
 		case '\n':		/** newline or return **/
 			if( mode != SEARCH )
@@ -1740,6 +1745,7 @@ static int mvcursor(register Vi_t* vp,register int motion)
 	case 'f':		/** find new char forward **/
 		bound = last_virt;
 		incr = 1;
+		/* FALLTHROUGH */
 
 	case 'T':		/** find up to new char backward **/
 	case 'F':		/** find new char backward **/
@@ -2411,10 +2417,12 @@ addin:
 		if(vp->ed->e_tabcount!=1)
 			return(BAD);
 		c = '=';
+		/* FALLTHROUGH */
 	case '*':		/** do file name expansion in place **/
 	case '\\':		/** do file name completion in place **/
 		if( cur_virt == INVALID )
 			return(BAD);
+		/* FALLTHROUGH */
 	case '=':		/** list file name expansions **/
 		save_v(vp);
 		i = last_virt;
@@ -2497,6 +2505,7 @@ addin:
 	case 'A':		/** append to end of line **/
 		cur_virt = last_virt;
 		sync_cursor(vp);
+		/* FALLTHROUGH */
 
 	case 'a':		/** append **/
 		if( fold(mode) == 'A' )
@@ -2516,6 +2525,7 @@ addin:
 	case 'I':		/** insert at beginning of line **/
 		cur_virt = first_virt;
 		sync_cursor(vp);
+		/* FALLTHROUGH */
 
 	case 'i':		/** insert **/
 		if( fold(mode) == 'I' )
@@ -2592,6 +2602,7 @@ deleol:
 				vp->ocur_virt = INVALID;
 			--cur_virt;
 		}
+		/* FALLTHROUGH */
 
 	case 'p':		/** print **/
 		if( p[0] == '\0' )

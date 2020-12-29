@@ -234,6 +234,7 @@ Sfdouble_t	arith_exec(Arith_t *ep)
 			continue;
 		    case A_ASSIGNOP1:
 			node.emode |= ARITH_ASSIGNOP;
+			/* FALLTHROUGH */
 		    case A_PUSHV:
 			cp = roundptr(ep,cp,Sfdouble_t*);
 			dp = *((Sfdouble_t**)cp);
@@ -278,6 +279,7 @@ Sfdouble_t	arith_exec(Arith_t *ep)
 			continue;
 		    case A_ASSIGNOP:
 			node.nosub = lastsub;
+			/* FALLTHROUGH */
 		    case A_STORE:
 			cp = roundptr(ep,cp,Sfdouble_t*);
 			dp = *((Sfdouble_t**)cp);
@@ -758,6 +760,7 @@ again:
 		case A_MINUSMINUS:
 			wasop=0;
 			op |= T_NOFLOAT;
+			/* FALLTHROUGH */
 		case A_ASSIGN:
 			if(!lvalue.value)
 				ERROR(vp,e_notlvalue);
