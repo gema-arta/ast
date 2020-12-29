@@ -57,7 +57,7 @@ struct login
 	char    *arg0;
 };
 
-int    b_exec(int argc,char *argv[], Shbltin_t *context)
+int    b_exec(int argc __unused, char *argv[], Shbltin_t *context)
 {
 	struct login logdata;
 	register int n;
