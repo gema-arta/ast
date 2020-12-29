@@ -1462,13 +1462,16 @@ cklang(register Magic_t* mp, const char* file, char* buf, char* end, struct stat
 			case 4:
 				if (b < e && (*b++ & 0xc0) != 0x80)
 					break;
+				/* FALLTHROUGH */
 			case 3:
 				if (b < e && (*b++ & 0xc0) != 0x80)
 					break;
+				/* FALLTHROUGH */
 			case 2:
 				if (b < e && (*b++ & 0xc0) != 0x80)
 					break;
 				n = 1;
+				/* FALLTHROUGH */
 			case 0:
 				if (b >= e)
 				{
