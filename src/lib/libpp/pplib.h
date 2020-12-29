@@ -426,17 +426,7 @@ struct pathid				/* physical file name and id	*/
  */
 
 #define MEMCPY(to,fr,n) \
-	do switch(n) \
-	{ default : memcpy(to,fr,n); to += n; fr += n; break; \
-	  case  7 : *to++ = *fr++; \
-	  case  6 : *to++ = *fr++; \
-	  case  5 : *to++ = *fr++; \
-	  case  4 : *to++ = *fr++; \
-	  case  3 : *to++ = *fr++; \
-	  case  2 : *to++ = *fr++; \
-	  case  1 : *to++ = *fr++; \
-	  case  0 : break; \
-	} while (0)
+	{ memcpy((Void_t*)to,(Void_t*)fr,n); to += n; fr += n; }
 
 #define NEWDIRECTIVE	(-1)
 

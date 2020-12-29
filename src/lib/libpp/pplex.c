@@ -1182,8 +1182,8 @@ ppcpp(void)
 		case '9':
 			if (!(st & COMPATIBILITY)) goto unknown;
 			if (st & STRICT) error(1, "%c: invalid character in octal character escape", c);
-			/*FALLTHROUGH*/
 #endif
+			/*FALLTHROUGH*/
 		case '0':
 		case '1':
 		case '2':
@@ -1207,8 +1207,8 @@ ppcpp(void)
 						break;
 					}
 					if (st & STRICT) error(1, "%c: invalid character in octal character escape", c);
-					/*FALLTHROUGH*/
 #endif
+					/*FALLTHROUGH*/
 				case '0':
 				case '1':
 				case '2':
@@ -2415,6 +2415,7 @@ pool(void)
 		{
 		case -1:
 			error(ERROR_SYSTEM|3, "cannot fork pool");
+			/* FALLTHROUGH */
 		case 0:
 			atexit(poolstatus);
 			error_info.errors = 0;
