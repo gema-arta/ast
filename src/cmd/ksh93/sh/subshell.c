@@ -260,9 +260,6 @@ Namval_t *sh_assignok(register Namval_t *np,int add)
 	shp = sp->shp;
 	dp = shp->var_tree;
 
-	/* don't bother to save if in newer scope */
-	if(sp->var!=shp->var_tree && sp->var!=shp->var_base && shp->last_root==shp->var_tree)
-		return(np);
 	if((ap=nv_arrayptr(np)) && (mp=nv_opensub(np)))
 	{
 		shp->last_root = ap->table;
