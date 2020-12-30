@@ -368,7 +368,7 @@ ppop(int op, ...)
 	register char*			s;
 	int				c;
 	long				n;
-	long*				r;
+	long*				r __unused;
 	char*				t;
 	struct ppdirs*			dp;
 	struct ppdirs*			hp;

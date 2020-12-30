@@ -193,6 +193,7 @@ static const Key_t	pragmas[] =
 	KEYENT("nonoticed",	HIT_noticed,	0),
 };
 
+#if PROTOMAIN
 static const Key_t	notices[] =
 {
 	KEYENT("Copyright",	HIT_noticed,	1),
@@ -201,6 +202,7 @@ static const Key_t	notices[] =
 	KEYENT("Public Domain",	HIT_noticed,	0),
 	KEYENT("PUBLIC DOMAIN",	HIT_noticed,	0),
 };
+#endif
 
 /*
  * generate integer
