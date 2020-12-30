@@ -81,6 +81,7 @@ extern void 	sh_iorestore(Shell_t*,int,int);
 extern Sfio_t 	*sh_iostream(Shell_t*,int);
 extern int	sh_redirect(Shell_t*,struct ionod*,int);
 extern void 	sh_iosave(Shell_t *, int,int,char*);
+extern int	sh_get_unused_fd(Shell_t* shp, int min_fd);
 extern int 	sh_iovalidfd(Shell_t*, int);
 extern int 	sh_inuse(Shell_t*, int);
 extern void 	sh_iounsave(Shell_t*);
