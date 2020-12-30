@@ -23,6 +23,9 @@
  *	David Korn
  *
  */
+/*
+ * Copyright (c) 2007, 2011, Oracle and/or its affiliates. All rights reserved.
+ */
 
 #include	<ast.h>
 #include	<sfio.h>
@@ -87,6 +90,12 @@ extern int	sh_devtofd(const char*);
 extern int	sh_isdevfd(const char*);
 extern int	sh_source(Shell_t*, Sfio_t*, const char*);
 
+extern int	VALIDATE_FD(Shell_t *, int);
+
+#define	VALIDATE_FD(shp, fd) \
+	(((fd) >= (shp)->gd->lim.open_max) ? sh_iovalidfd(shp, fd) : 1)
+
+
 /* the following are readonly */
 extern const char	e_pexists[];
 extern const char	e_query[];
@@ -126,4 +135,5 @@ extern const char	e_bash_profile[];
 extern const char	e_stdprompt[];
 extern const char	e_supprompt[];
 extern const char	e_ambiguous[];
+
 #endif /* KSHELL */

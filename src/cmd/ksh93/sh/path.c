@@ -23,6 +23,9 @@
  * AT&T Labs
  *
  */
+/*
+ * Copyright (c) 2007, 2011, Oracle and/or its affiliates. All rights reserved.
+ */
 
 #include	"defs.h"
 #include	<fcin.h>
@@ -534,6 +537,7 @@ static int	path_opentype(Shell_t *shp,const char *name, register Pathcomp_t *pp,
 	if(fd>=0 && (fd = sh_iomovefd(fd)) > 0)
 	{
 		fcntl(fd,F_SETFD,FD_CLOEXEC);
+		VALIDATE_FD(shp, fd);
 		shp->fdstatus[fd] |= IOCLEX;
 	}
 	return(fd);
@@ -1274,6 +1278,7 @@ static void exscript(Shell_t *shp,register char *path,register char *argv[],char
 	if(sp=fcfile())
 		while(sfstack(sp,SF_POPSTACK));
 	job_clear();
+	VALIDATE_FD(shp, shp->infd);
 	if(shp->infd>0 && (shp->fdstatus[shp->infd]&IOCLEX))
 		sh_close(shp->infd);
 	sh_setstate(sh_state(SH_FORKED));

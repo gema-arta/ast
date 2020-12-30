@@ -125,6 +125,7 @@ void	sh_subtmpfile(Shell_t *shp)
 		if((sp->tmpfd = fd = fcntl(1,F_DUPFD,10)) >= 0)
 		{
 			fcntl(fd,F_SETFD,FD_CLOEXEC);
+			VALIDATE_FD(shp, fd);
 			shp->fdstatus[fd] = shp->fdstatus[1]|IOCLEX;
 			close(1);
 		}
@@ -151,6 +152,7 @@ void	sh_subtmpfile(Shell_t *shp)
 		}
 		else
 		{
+			VALIDATE_FD(shp, fd);
 			shp->fdstatus[fd] = IOREAD|IOWRITE;
 			sfsync(sfstdout);
 			if(fd==1)
@@ -679,8 +681,7 @@ Sfio_t *sh_subshell(Shell_t *shp,Shnode_t *t, volatile int flags, int comsub)
 					((struct checkpt*)shp->jmplist)->mode = SH_JMPERREXIT;
 					errormsg(SH_DICT,ERROR_system(1),e_toomany);
 				}
-				if(fd >= shp->gd->lim.open_max)
-					sh_iovalidfd(shp,fd);
+				VALIDATE_FD(shp, fd);
 				shp->sftable[fd] = iop;
 				fcntl(fd,F_SETFD,FD_CLOEXEC);
 				shp->fdstatus[fd] = (shp->fdstatus[1]|IOCLEX);

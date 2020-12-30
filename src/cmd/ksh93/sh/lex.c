@@ -25,6 +25,9 @@
  * AT&T Labs
  *
  */
+/*
+ * Copyright (c) 2007, 2011, Oracle and/or its affiliates. All rights reserved.
+ */
 
 #include	<ast.h>
 #include	<stak.h>
@@ -2130,6 +2133,7 @@ void	sh_syntax(Lex_t *lp)
 	else
 		lp->lastline = shp->inlineno;
 	tokstr = fmttoken(lp,tok,tokbuf);
+	VALIDATE_FD(shp, shp->infd);
 	if((sp=fcfile()) || (shp->infd>=0 && (sp=shp->sftable[shp->infd])))
 	{
 		/* clear out any pending input */

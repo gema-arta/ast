@@ -117,6 +117,8 @@ static int iousepipe(Shell_t *shp)
 	usepipe++;
 	fcntl(subpipe[0],F_SETFD,FD_CLOEXEC);
 	subpipe[2] = fcntl(1,F_DUPFD,10);
+	VALIDATE_FD(shp, subpipe[1]);
+	VALIDATE_FD(shp, subpipe[2]);	
 	fcntl(subpipe[2],F_SETFD,FD_CLOEXEC);
 	shp->fdstatus[subpipe[2]] = shp->fdstatus[1];
 	close(1);
@@ -141,6 +143,7 @@ static void iounpipe(Shell_t *shp)
 	char buff[SF_BUFSIZE];
 	close(1);
 	fcntl(subpipe[2], F_DUPFD, 1);
+	VALIDATE_FD(shp, subpipe[2]);
 	shp->fdstatus[1] = shp->fdstatus[subpipe[2]];
 	--usepipe;
 	if(subdup) for(n=0; n < 10; n++)
@@ -886,6 +889,7 @@ static int sh_coexec(Shell_t *shp,const Shnode_t *t, int filt)
 			if(filt > 2)
 			{
 				shp->coutpipe = shp->inpipe[1];
+				VALIDATE_FD(shp, shp->coutpipe);
 				shp->fdptrs[shp->coutpipe] = &shp->coutpipe;
 			}
 		}
@@ -1647,6 +1651,7 @@ int sh_exec(register const Shnode_t *t, int flags)
 						if(shp->cpipe[0]<0 || shp->cpipe[1] < 0)
 						{
 							sh_copipe(shp,shp->outpipe=shp->cpipe,0);
+							VALIDATE_FD(shp, shp->cpipe[0]);
 							shp->fdptrs[shp->cpipe[0]] = shp->cpipe;
 						}
 						sh_copipe(shp,shp->inpipe=pipes,0);
@@ -3625,6 +3630,8 @@ static void coproc_init(Shell_t *shp, int pipes[])
 		if((outfd=shp->cpipe[1]) < 10) 
 		{
 		        int fd=fcntl(shp->cpipe[1],F_DUPFD,10);
+			VALIDATE_FD(shp, outfd);
+			VALIDATE_FD(shp, fd);
 			if(fd>=10)
 			{
 			        shp->fdstatus[fd] = (shp->fdstatus[outfd]&~IOCLEX);
@@ -3633,6 +3640,9 @@ static void coproc_init(Shell_t *shp, int pipes[])
 				shp->cpipe[1] = fd;
 			}
 		}
+		VALIDATE_FD(shp, shp->cpipe[0]);
+		VALIDATE_FD(shp, shp->cpipe[1]);
+
 		if(fcntl(*shp->cpipe,F_SETFD,FD_CLOEXEC)>=0)
 			shp->fdstatus[shp->cpipe[0]] |= IOCLEX;
 		shp->fdptrs[shp->cpipe[0]] = shp->cpipe;
@@ -3643,7 +3653,9 @@ static void coproc_init(Shell_t *shp, int pipes[])
 	shp->outpipe = shp->cpipe;
 	sh_pipe(shp->inpipe=pipes);
 	shp->coutpipe = shp->inpipe[1];
+	VALIDATE_FD(shp, shp->coutpipe);
 	shp->fdptrs[shp->coutpipe] = &shp->coutpipe;
+	VALIDATE_FD(shp, shp->outpipe[0]);
 	if(fcntl(shp->outpipe[0],F_SETFD,FD_CLOEXEC)>=0)
 		shp->fdstatus[shp->outpipe[0]] |= IOCLEX;
 }
@@ -3814,6 +3826,7 @@ static pid_t sh_ntfork(Shell_t *shp,const Shnode_t *t,char *argv[],int *jobid,in
 				int fd = shp->inpipe[1];
 				sh_iosave(shp,0,buffp->topfd,(char*)0);
 				sh_iorenumber(shp,shp->inpipe[0],0);
+				VALIDATE_FD(shp, fd);
 				if(fd>=0 && (!(otype&FPOU) || (otype&FCOOP)) && fcntl(fd,F_SETFD,FD_CLOEXEC)>=0)
 					shp->fdstatus[fd] |= IOCLEX;
 			}
@@ -3825,6 +3838,7 @@ static pid_t sh_ntfork(Shell_t *shp,const Shnode_t *t,char *argv[],int *jobid,in
 #endif /* SHOPT_COSHELL */
 				sh_iosave(shp,1,buffp->topfd,(char*)0);
 				sh_iorenumber(shp,sh_dup(shp->outpipe[1]),1);
+				VALIDATE_FD(shp, shp->outpipe[0]);
 				if(fcntl(shp->outpipe[0],F_SETFD,FD_CLOEXEC)>=0)
 					shp->fdstatus[shp->outpipe[0]] |= IOCLEX;
 			}
@@ -3864,6 +3878,7 @@ static pid_t sh_ntfork(Shell_t *shp,const Shnode_t *t,char *argv[],int *jobid,in
 			signal(SIGQUIT,sh_fault);
 			signal(SIGINT,sh_fault);
 		}
+		VALIDATE_FD(shp, shp->inpipe[1]);
 		if((otype&FPIN) && (!(otype&FPOU) || (otype&FCOOP)) && fcntl(shp->inpipe[1],F_SETFD,FD_CLOEXEC)>=0)
 			shp->fdstatus[shp->inpipe[1]] &= ~IOCLEX;
 		if(t->fork.forkio || otype)

@@ -605,8 +605,10 @@ static void io_preserve(Shell_t* shp, register Sfio_t *sp, register int f2)
 		((struct checkpt*)shp->jmplist)->mode = SH_JMPERREXIT;
 		errormsg(SH_DICT,ERROR_system(1),e_toomany);
 	}
-	if(f2 >= shp->gd->lim.open_max)
-		sh_iovalidfd(shp,f2);
+
+	VALIDATE_FD(shp, fd);
+	VALIDATE_FD(shp, f2);
+
 	if(shp->fdptrs[fd]=shp->fdptrs[f2])
 	{
 		if(f2==job.fd)
@@ -632,7 +634,12 @@ static void io_preserve(Shell_t* shp, register Sfio_t *sp, register int f2)
  */
 int sh_iorenumber(Shell_t *shp, register int f1,register int f2)
 {
-	register Sfio_t *sp = shp->sftable[f2];
+	register Sfio_t *sp;
+
+	VALIDATE_FD(shp, f1);
+	VALIDATE_FD(shp, f2);
+
+	sp = shp->sftable[f2];
 	if(f1!=f2)
 	{
 		/* see whether file descriptor is in use */
@@ -672,8 +679,7 @@ int sh_iorenumber(Shell_t *shp, register int f1,register int f2)
 		if(f2<=2)
 			sfset(sp,SF_SHARE|SF_PUBLIC,1);
 	}
-	if(f2>=shp->gd->lim.open_max)
-		sh_iovalidfd(shp,f2);
+	VALIDATE_FD(shp, f2);
 	return(f2);
 }
 
@@ -687,8 +693,9 @@ int sh_close(register int fd)
 	register int r = 0;
 	if(fd<0)
 		return(-1);
-	if(fd >= shp->gd->lim.open_max)
-		sh_iovalidfd(shp,fd);
+
+	VALIDATE_FD(shp, fd);
+
 	if(!(sp=shp->sftable[fd]) || sfclose(sp) < 0)
 	{
 		int err=errno;
@@ -846,8 +853,7 @@ int sh_open(register const char *path, int flags, ...)
 		mode = (IOREAD|IOWRITE);
 	else
 		mode = IOREAD;
-	if(fd >= shp->gd->lim.open_max)
-		sh_iovalidfd(shp,fd);
+	VALIDATE_FD(shp, fd);
 	shp->fdstatus[fd] = mode;
 	return(fd);
 }
@@ -871,11 +877,12 @@ int sh_iomovefd(register int fdold)
 {
 	Shell_t *shp = sh_getinterp();
 	register int fdnew;
-	if(fdold >= shp->gd->lim.open_max)
-		sh_iovalidfd(shp,fdold);
+	VALIDATE_FD(shp, fdold);
 	if(fdold<0 || fdold>2)
 		return(fdold);
 	fdnew = sh_iomovefd(dup(fdold));
+	VALIDATE_FD(shp, fdold);
+	VALIDATE_FD(shp, fdnew);
 	shp->fdstatus[fdnew] = (shp->fdstatus[fdold]&~IOCLEX);
 	close(fdold);
 	shp->fdstatus[fdold] = IOCLOSE;
@@ -936,6 +943,9 @@ int	sh_pipe(register int pv[])
 		sh_close(fd);
 	else
 		pv[out] = sh_iomovefd(fd);
+
+	VALIDATE_FD(shp, pv[out]);
+
 	if(fcntl(pv[out],F_SETFD,FD_CLOEXEC) >=0)
 		shp->fdstatus[pv[out]] |= IOCLEX;
 	shp->fdstatus[pv[out]] = (out?IOWRITE:IOREAD);
@@ -968,6 +978,9 @@ int	sh_pipe(register int pv[])
 		errormsg(SH_DICT,ERROR_system(1),e_pipe);
 	}
 	fcntl(pv[out],F_SETFD,FD_CLOEXEC);
+
+	VALIDATE_FD(shp, pv[out]);
+
 	shp->fdstatus[pv[out]] |= IOCLEX;
 	pv[1-out] = -1;
 	pv[2] = port;
@@ -997,9 +1010,13 @@ static int pat_line(const regex_t* rp, const char *buff, register size_t n)
 static int io_patseek(Shell_t *shp, regex_t *rp, Sfio_t* sp, int flags)
 {
 	char	*cp, *match;
-	int	r, fd=sffileno(sp), close_exec = shp->fdstatus[fd]&IOCLEX;
+	int	r, fd, close_exec;
 	int	was_share,s=(PIPE_BUF>SF_BUFSIZE?SF_BUFSIZE:PIPE_BUF);
 	size_t	n,m;
+
+	fd = sffileno(sp);
+	VALIDATE_FD(shp, fd);
+	close_exec = shp->fdstatus[fd]&IOCLEX;
 	shp->fdstatus[sffileno(sp)] |= IOCLEX;
 	if(fd==0)
 		was_share = sfset(sp,SF_SHARE,1);
@@ -1033,12 +1050,17 @@ static int io_patseek(Shell_t *shp, regex_t *rp, Sfio_t* sp, int flags)
 
 static Sfoff_t	file_offset(Shell_t *shp, int fn, char *fname)
 {
-	Sfio_t		*sp = shp->sftable[fn];
+	Sfio_t		*sp;
 	char		*cp;
 	Sfoff_t		off;
 	struct Eof	endf;
 	Namval_t	*mp = nv_open("EOF",shp->var_tree,0);
 	Namval_t	*pp = nv_open("CUR",shp->var_tree,0);
+
+	VALIDATE_FD(shp, fn);
+
+	sp = shp->sftable[fn];
+
 	memset(&endf,0,sizeof(struct Eof));
 	endf.fd = fn;
 	endf.hdr.disc = &EOF_disc;
@@ -1216,7 +1238,7 @@ int	sh_redirect(Shell_t *shp,struct ionod *iop, int flag)
 			if((iof&IOLSEEK) || ((iof&IOMOV) && *fname=='-'))
 				fn = nv_getnum(np);
 		}
-		if(fn>=shp->gd->lim.open_max && !sh_iovalidfd(shp,fn))
+		if (!VALIDATE_FD(shp, fn))
 			errormsg(SH_DICT,ERROR_system(1),e_file+4);
 		if(iof&IOLSEEK)
 		{
@@ -1259,6 +1281,7 @@ int	sh_redirect(Shell_t *shp,struct ionod *iop, int flag)
 						message = e_file;
 						goto fail;
 					}
+					VALIDATE_FD(shp, dupfd);
 					if(shp->subshell && dupfd==1)
 					{
 						if(sfset(sfstdout,0,0)&SF_STRING)
@@ -1295,8 +1318,7 @@ int	sh_redirect(Shell_t *shp,struct ionod *iop, int flag)
 					goto traceit;
 				if((fd=sh_fcntl(dupfd,F_DUPFD,3))<0)
 					goto fail;
-				if(fd>= shp->gd->lim.open_max)
-					sh_iovalidfd(shp,fd);
+				VALIDATE_FD(shp, fd);
 				sh_iocheckfd(shp,dupfd);
 				shp->fdstatus[fd] = (shp->fdstatus[dupfd]&~IOCLEX);
 				if(toclose<0 && shp->fdstatus[fd]&IOREAD)
@@ -1410,7 +1432,11 @@ int	sh_redirect(Shell_t *shp,struct ionod *iop, int flag)
 			}
 			if(iof&IOLSEEK)
 			{
-				Sfio_t *sp = shp->sftable[fn];
+				Sfio_t *sp;
+
+				VALIDATE_FD(shp, fn);
+
+				sp = shp->sftable[fn];
 				r = shp->fdstatus[fn];
 				if(!(r&(IOSEEK|IONOSEEK)))
 					r = sh_iocheckfd(shp,fn);
@@ -1491,6 +1517,7 @@ int	sh_redirect(Shell_t *shp,struct ionod *iop, int flag)
 			}
 			if(fd<0)
 			{
+				VALIDATE_FD(shp, fn);
 				if(sh_inuse(shp,fn) || (fn && fn==shp->infd))
 				{
 					if(fn>9 || !(shp->inuse_bits&(1<<fn)))
@@ -1510,7 +1537,7 @@ int	sh_redirect(Shell_t *shp,struct ionod *iop, int flag)
 					{
 						if((fn=fcntl(fd,F_DUPFD,10)) < 0)
 							goto fail;
-						if(fn>=shp->gd->lim.open_max && !sh_iovalidfd(shp,fn))
+						if (!VALIDATE_FD(shp, fn))
 							goto fail;
 						if(flag!=2 || shp->subshell)
 							sh_iosave(shp,fn,indx|0x10000,tname?fname:(trunc?Empty:0));
@@ -1701,7 +1728,12 @@ void sh_iosave(Shell_t *shp, register int origfd, int oldtop, char *name)
 	filemap[shp->topfd++].save_fd = savefd;
 	if(savefd >=0)
 	{
-		register Sfio_t* sp = shp->sftable[origfd];
+		register Sfio_t* sp;
+
+		VALIDATE_FD(shp, origfd);
+		VALIDATE_FD(shp, savefd);
+
+		sp = shp->sftable[origfd];
 		/* make saved file close-on-exec */
 		sh_fcntl(savefd,F_SETFD,FD_CLOEXEC);
 		if(origfd==job.fd)
@@ -1734,6 +1766,7 @@ void	sh_iounsave(Shell_t* shp)
 			filemap[newfd++] = filemap[fd];
 		else
 		{
+			VALIDATE_FD(shp, savefd);
 			shp->sftable[savefd] = 0;
 			sh_close(savefd);
 		}
@@ -1757,16 +1790,19 @@ void	sh_iorestore(Shell_t *shp, int last, int jmpval)
 		{
 			if ((savefd = filemap[fd].save_fd) >= 0)
 			{
+				VALIDATE_FD(shp, savefd);
 				shp->sftable[savefd] = 0;
 				sh_close(savefd);
 			}
 			continue;
 		}
 		origfd = filemap[fd].orig_fd;
+		VALIDATE_FD(shp, origfd);
 		if(origfd<0)
 		{
 			/* this should never happen */
 			savefd = filemap[fd].save_fd;
+			VALIDATE_FD(shp, savefd);
 			shp->sftable[savefd] = 0;
 			sh_close(savefd);
 			return;
@@ -1778,6 +1814,7 @@ void	sh_iorestore(Shell_t *shp, int last, int jmpval)
 		sh_close(origfd);
 		if ((savefd = filemap[fd].save_fd) >= 0)
 		{
+			VALIDATE_FD(shp, savefd);
 			sh_fcntl(savefd, F_DUPFD, origfd);
 			if(savefd==job.fd)
 				job.fd=origfd;
@@ -2035,6 +2072,9 @@ static ssize_t slowread(Sfio_t *iop,void *buff,register size_t size,Sfdisc_t *ha
 int sh_iocheckfd(Shell_t *shp, register int fd)
 {
 	register int flags, n;
+
+	VALIDATE_FD(shp, fd);
+
 	if((n=shp->fdstatus[fd])&IOCLOSE)
 		return(n);
 	if(!(n&(IOREAD|IOWRITE)))
@@ -2226,7 +2266,7 @@ static void	sftrack(Sfio_t* sp, int flag, void* data)
 		return;
 	}
 #endif
-	if(fd<0 || fd==PSEUDOFD || (fd>=shp->gd->lim.open_max && !sh_iovalidfd(shp,fd)))
+	if(fd<0 || fd==PSEUDOFD || !VALIDATE_FD(shp, fd))
 		return;
 	if(sh_isstate(SH_NOTRACK))
 		return;
@@ -2495,6 +2535,8 @@ ssize_t sh_read(register int fd, void* buff, size_t n)
 {
 	Shell_t *shp = sh_getinterp();
 	register Sfio_t *sp;
+
+	VALIDATE_FD(shp, fd);
 	if(sp=shp->sftable[fd])
 		return(sfread(sp,buff,n));
 	else
@@ -2509,6 +2551,8 @@ ssize_t sh_write(register int fd, const void* buff, size_t n)
 {
 	Shell_t *shp = sh_getinterp();
 	register Sfio_t *sp;
+
+	VALIDATE_FD(shp, fd);
 	if(sp=shp->sftable[fd])
 		return(sfwrite(sp,buff,n));
 	else
@@ -2523,6 +2567,8 @@ off_t sh_seek(register int fd, off_t offset, int whence)
 {
 	Shell_t *shp = sh_getinterp();
 	register Sfio_t *sp;
+
+	VALIDATE_FD(shp, fd);
 	if((sp=shp->sftable[fd]) && (sfset(sp,0,0)&(SF_READ|SF_WRITE)))
 		return(sfseek(sp,offset,whence));
 	else
@@ -2534,6 +2580,9 @@ int sh_dup(register int old)
 {
 	Shell_t *shp = sh_getinterp();
 	register int fd = dup(old);
+
+	VALIDATE_FD(shp, old);
+	VALIDATE_FD(shp, fd);
 	if(fd>=0)
 	{
 		if(shp->fdstatus[old] == IOCLOSE)
@@ -2555,13 +2604,15 @@ int sh_fcntl(register int fd, int op, ...)
 	arg =  va_arg(ap, int) ;
 	va_end(ap);
 	newfd = fcntl(fd,op,arg);
+
+	VALIDATE_FD(shp, fd);
+	VALIDATE_FD(shp, newfd);
+
 	if(newfd>=0) switch(op)
 	{
 	    case F_DUPFD:
 		if(shp->fdstatus[fd] == IOCLOSE)
 			shp->fdstatus[fd] = 0;
-		if(newfd>=shp->gd->lim.open_max)
-			sh_iovalidfd(shp,newfd);
 		shp->fdstatus[newfd] = (shp->fdstatus[fd]&~IOCLEX);
 		if(fdnotify)
 			(*fdnotify)(fd,newfd);
@@ -2630,6 +2681,7 @@ Sfio_t *sh_iogetiop(int fd, int mode)
 		return(iop);
 	if(mode==SF_READ && !(n&IOREAD))
 		return(iop);
+	VALIDATE_FD(shp, fd);
 	if(!(iop = shp->sftable[fd]))
 		iop=sh_iostream(shp,fd);
 	return(iop);
@@ -2649,7 +2701,10 @@ Sfio_t	*sh_fd2sfio(int fd)
 {
 	Shell_t	*shp = sh_getinterp();
 	register int status;
-	Sfio_t *sp = shp->sftable[fd];
+	Sfio_t *sp;
+
+	VALIDATE_FD(shp, fd);
+	sp = shp->sftable[fd];
 	if(!sp  && (status = sh_iocheckfd(shp,fd))!=IOCLOSE)
 	{
 		register int flags=0;

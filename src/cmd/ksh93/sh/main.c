@@ -26,6 +26,9 @@
  * AT&T Labs
  *
  */
+/*
+ * Copyright (c) 2007, 2011, Oracle and/or its affiliates. All rights reserved.
+ */
 
 #include	<ast.h>
 #include	<sfio.h>
@@ -376,8 +379,10 @@ static void	exfile(register Shell_t *shp, register Sfio_t *iop,register int fno)
 		if(fno > 0)
 		{
 			int r;
+			VALIDATE_FD(shp, fno);
 			if(fno < 10 && ((r=sh_fcntl(fno,F_DUPFD,10))>=10))
 			{
+				VALIDATE_FD(shp, r);
 				shp->fdstatus[r] = shp->fdstatus[fno];
 				sh_close(fno);
 				fno = r;

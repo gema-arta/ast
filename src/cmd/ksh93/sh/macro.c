@@ -2125,6 +2125,7 @@ static void comsubst(Mac_t *mp,register Shnode_t* t, int type)
 			sh_popcontext(mp->shp,&buff);
 			if(r==0 && ip && (ip->iofile&IOLSEEK))
 			{
+				VALIDATE_FD(mp->shp, fd);
 				if(sp=mp->shp->sftable[fd])
 					num = sftell(sp);
 				else
