@@ -2022,6 +2022,11 @@ static void env_init(Shell_t *shp)
 		*dp++ = 0;
 		if(mp = dtmatch(shp->var_base,cp))
 		{
+                        if(strcmp(cp,VERSIONNOD->nvname)==0)
+                        {
+                                dp[-1] = '=';
+                                continue;
+                        }
 			mp->nvenv = (char*)cp;
 			dp[-1] = '=';
 		}
