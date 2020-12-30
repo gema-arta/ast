@@ -19,6 +19,9 @@
 *                   Phong Vo <kpv@research.att.com>                    *
 *                                                                      *
 ***********************************************************************/
+/*
+ * Copyright (c) 2007, 2012, Oracle and/or its affiliates. All rights reserved.
+ */
 #pragma prototyped
 
 /*
@@ -2215,6 +2218,24 @@ iswalpha(wchar_t c)
 
 typedef int (*Isw_f)(wchar_t);
 
+static int
+wide_wctomb(char* u, wchar_t w)
+{
+	int size = 0;
+
+	if (u)
+	{
+		size = wctomb(u, w);
+		if (size < 0)
+		{
+			*u = (char)(w & 0xff);
+			size = 1;
+		}
+	}
+
+	return size;
+}
+
 /*
  * called when LC_CTYPE initialized or changes
  */
@@ -2259,7 +2280,7 @@ set_ctype(Lc_category_t* cp)
 	{
 		if (!(ast.mb_width = wcwidth))
 			ast.mb_width = default_wcwidth;
-		ast.mb_conv = wctomb;
+		ast.mb_conv = wide_wctomb;
 #ifdef mb_state
 		{
 			/*
