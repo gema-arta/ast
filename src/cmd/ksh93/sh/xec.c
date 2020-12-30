@@ -1693,7 +1693,7 @@ int sh_exec(register const Shnode_t *t, int flags)
 #else
 #if SHOPT_SPAWN
 #   ifdef _lib_fork
-				if(com)
+				if(com && !job.jobcontrol)
 					parent = sh_ntfork(shp,t,com,&jobid,ntflag);
 				else
 					parent = sh_fork(shp,type,&jobid);
