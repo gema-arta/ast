@@ -521,10 +521,19 @@ Sfdouble_t sh_strnum(register const char *str, char** ptr, int mode)
 	d = strtonll(str,&last,&base,-1);
 	if(*last || errno)
 	{
-		if(!last || *last!='.' || last[1]!='.')
-			d = strval(shp,str,&last,arith,mode);
-		if(!ptr && *last && mode>0)
-			errormsg(SH_DICT,ERROR_exit(1),e_lexbadchar,*last,str);
+		if (sh_isstate(SH_INIT)) {
+			// Initializing means importing untrusted env vars.
+			// Since the string does not appear to be a recognized
+			// numeric literal give up. We can't safely call
+			// strval() since that allows arbitrary expressions
+			// which would create a security vulnerability.
+			d = 0.0;
+		} else {
+			if(!last || *last!='.' || last[1]!='.')
+				d = strval(shp,str,&last,arith,mode);
+			if(!ptr && *last && mode>0)
+				errormsg(SH_DICT,ERROR_exit(1),e_lexbadchar,*last,str);
+		}
 	}
 	else if (!d && *str=='-')
 		d = -0.0;
