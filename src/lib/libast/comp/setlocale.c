@@ -603,7 +603,13 @@ utf8_mbtowc(wchar_t* wp, const char* str, size_t n)
 	register int		c;
 	register wchar_t	w = 0;
 
-	if (!sp || !n)
+	if (!sp)
+	{
+		if(!wp)
+			ast.mb_sync = 0;
+		return 0;
+	}
+	if(!n)
 		return 0;
 	if ((m = utf8tab[*sp]) > 0)
 	{
