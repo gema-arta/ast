@@ -244,15 +244,22 @@ Namval_t *sh_assignok(register Namval_t *np,int add)
 {
 	register Namval_t	*mp;
 	register struct Link	*lp;
-	register struct subshell *sp = (struct subshell*)subshell_data;
-	Shell_t			*shp = sp->shp;
-	Dt_t			*dp= shp->var_tree;
+	register struct subshell *sp;
+	Shell_t			*shp;
+	Dt_t			*dp;
 	Namval_t		*mpnext;
 	Namarr_t		*ap;
 	int			save;
+
+	sp = (struct subshell*)subshell_data;
+
 	/* don't bother with this */
-	if(!sp->shpwd || np==SH_LEVELNOD || np==L_ARGNOD || np==SH_SUBSCRNOD || np==SH_NAMENOD)
+	if(!sp || !sp->shpwd || np==SH_LEVELNOD || np==L_ARGNOD || np==SH_SUBSCRNOD || np==SH_NAMENOD)
 		return(np);
+
+	shp = sp->shp;
+	dp = shp->var_tree;
+
 	/* don't bother to save if in newer scope */
 	if(sp->var!=shp->var_tree && sp->var!=shp->var_base && shp->last_root==shp->var_tree)
 		return(np);
