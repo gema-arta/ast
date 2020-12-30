@@ -26,6 +26,9 @@
  * AT&T Labs
  *
  */
+/*
+ * Copyright (c) 2007, 2012, Oracle and/or its affiliates. All rights reserved.
+ */
 
 #include	"defs.h"
 #include	"path.h"
@@ -303,6 +306,11 @@ int sh_argopts(int argc,register char *argv[], void *context)
 		}
 		else
 		{
+			if ((o == SH_RESTRICTED) &&
+			    sh_isoption(SH_RESTRICTED)) {
+				errormsg(SH_DICT, ERROR_exit(1),
+				    e_restricted, "r");
+			}
 			if(o==SH_XTRACE)
 				trace = 0;
 			off_option(&newflags,o);
