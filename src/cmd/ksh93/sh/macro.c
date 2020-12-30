@@ -1199,6 +1199,13 @@ retry1:
 		}
 		else
 			v = 0;
+		if(!v && sh_isoption(SH_NOUNSET))
+		{
+			d=fcget();
+			fcseek(-1);
+			if(d=='\0' || !strchr(":+-?=",d))
+				errormsg(SH_DICT,ERROR_exit(1),e_notset,ltos(c));
+		}
 		break;
 	    case S_ALP:
 		if(c=='.' && type==0)
