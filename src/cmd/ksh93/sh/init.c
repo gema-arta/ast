@@ -284,8 +284,11 @@ done:
 static void put_history(register Namval_t* np,const char *val,int flags,Namfun_t *fp)
 {
 	Shell_t *shp = nv_shell(np);
-	void 	*histopen = shp->gd->hist_ptr;
+	void 	*histopen = NULL;
 	char	*cp;
+	if( shp ) { 
+	    histopen = shp->gd->hist_ptr; 
+	}
 	if(val && histopen)
 	{
 		if(np==HISTFILE && (cp=nv_getval(np)) && strcmp(val,cp)==0) 
