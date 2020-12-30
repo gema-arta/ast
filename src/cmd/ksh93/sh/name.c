@@ -22,6 +22,9 @@
  * AT&T Labs
  *
  */
+/*
+ * Copyright (c) 2007, 2012, Oracle and/or its affiliates. All rights reserved.
+ */
 
 #define putenv	___putenv
 
@@ -1925,7 +1928,10 @@ void nv_putval(register Namval_t *np, const char *string, int flags)
 #endif
 			{
 				if(size==0 && nv_isattr(np,NV_HOST)!=NV_HOST &&nv_isattr(np,NV_LJUST|NV_RJUST|NV_ZFILL))
+				{
 					nv_setsize(np,size=dot);
+					tofree = up->cp;
+				}
 				else if(size > dot)
 					dot = size;
 				else if(nv_isattr(np,NV_LJUST|NV_RJUST)==NV_LJUST && dot>size)
