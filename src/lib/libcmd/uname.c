@@ -435,7 +435,7 @@ b_uname(int argc, char** argv, Shbltin_t* context)
 #if _lib_gethostid
 				sfsprintf(s = buf, sizeof(buf), "%08x", gethostid());
 #else
-				/*NOP*/;
+				{/*NOP*/};
 #endif
 			output(OPT_hostid, s, "hostid");
 		}
@@ -451,7 +451,7 @@ b_uname(int argc, char** argv, Shbltin_t* context)
 #if _lib_getdomainname
 				getdomainname(s, sizeof(buf));
 #else
-				/*NOP*/;
+				{/*NOP*/};
 #endif
 			output(OPT_domain, s, "domain");
 		}
