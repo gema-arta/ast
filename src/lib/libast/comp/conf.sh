@@ -241,7 +241,7 @@ case $append$extra in
 						;;
 					*" -$f- "*)
 						;;
-					*)	if	iffe -n - hdr $f | grep _hdr_$f >/dev/null
+					*)	if	iffe -c "$cc" -n - hdr $f | grep _hdr_$f >/dev/null
 						then	hdr="$hdr $f"
 							headers=$headers$nl#include$sp'<'$1'>'
 						else	hdr="$hdr -$f-"
