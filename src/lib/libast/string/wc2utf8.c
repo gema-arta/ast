@@ -63,9 +63,13 @@ wc2utf8(register char* s, register uint32_t w)
 			switch (ops[i].shift)
 			{
 			case 30:	*s++ = 0x80 | ((w >> 24) & 0x3f);
+			/* FALLTHROUGH */
 			case 24:	*s++ = 0x80 | ((w >> 18) & 0x3f);
+			/* FALLTHROUGH */
 			case 18:	*s++ = 0x80 | ((w >> 12) & 0x3f);
+			/* FALLTHROUGH */
 			case 12:	*s++ = 0x80 | ((w >>  6) & 0x3f);
+			/* FALLTHROUGH */
 			case  6:	*s++ = 0x80 | (w & 0x3f);
 			}
 			return s - b;
