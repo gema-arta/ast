@@ -1851,6 +1851,7 @@ int	sh_ioctl(int fd, int cmd, void* val, int sz)
 
 #ifdef _lib_tcgetattr
 #   undef tcgetattr
+int
     sh_tcgetattr(int fd, struct termios *tty)
     {
 	int r,err = errno;
@@ -1860,6 +1861,7 @@ int	sh_ioctl(int fd, int cmd, void* val, int sz)
     }
 
 #   undef tcsetattr
+int
     sh_tcsetattr(int fd, int cmd, struct termios *tty)
     {
 	int r,err = errno;
