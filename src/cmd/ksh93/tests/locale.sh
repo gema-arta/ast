@@ -336,7 +336,7 @@ then	LC_ALL=en_US.UTF-8
 	[[ $(print -r -- "$x") == $'hello\u[20ac]\xee world' ]] || err_exit '%q with unicode and non-unicode not working'
 	if	[[ $(whence od) ]]
 	then	got='68 65 6c 6c 6f e2 82 ac ee 20 77 6f 72 6c 64 0a'
-		[[ $(print -r -- "$x" | od -An -tx1) == "$got" ]] || err_exit "incorrect string from printf %q"
+		[[ $(print -r -- "$x" | od -An -tx1 | xargs echo) == "$got" ]] || err_exit "incorrect string from printf %q"
 	fi
 	
 fi
