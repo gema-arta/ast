@@ -917,9 +917,7 @@ int job_walk(Sfio_t *file,int (*fun)(struct process*,int),int arg,char *joblist[
 	by_number = 0;
 	job_lock();
 	pw = job.pwlist;
-#if SHOPT_COSHELL
 	job_waitsafe(SIGCHLD);
-#endif /* SHOPT_COSHELL */
 	if(jobs==0)
 	{
 		/* do all jobs */
