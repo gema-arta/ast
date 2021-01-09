@@ -36,13 +36,13 @@ tst	output{
 	#include <signal.h>
 	int main()
 	{
-	#ifdef SIGRTMIN
+	#ifdef _SIGRTMIN
 		printf("#undef	_SIGRTMIN\n");
-		printf("#define _SIGRTMIN	%d\n", SIGRTMIN);
+		printf("#define _SIGRTMIN	%d\n", _SIGRTMIN);
 	#endif
-	#ifdef SIGRTMAX
+	#ifdef _SIGRTMAX
 		printf("#undef	_SIGRTMAX\n");
-		printf("#define _SIGRTMAX	%d\n", SIGRTMAX);
+		printf("#define _SIGRTMAX	%d\n", _SIGRTMAX);
 	#endif
 		return 0;
 	}

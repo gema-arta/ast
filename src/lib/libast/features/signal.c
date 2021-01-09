@@ -307,9 +307,9 @@ main()
 			mapindex[j] = i;
 		}
 #ifdef SIGRTMIN
-	i = SIGRTMIN;
+	i = _SIGRTMIN;
 #ifdef SIGRTMAX
-	j = SIGRTMAX;
+	j = _SIGRTMAX;
 #else
 	j = i;
 #endif
