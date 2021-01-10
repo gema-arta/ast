@@ -94,7 +94,7 @@ is_hdr() # [ - ] [ file.c ] hdr
 pkg() # package
 {
 	case $1 in
-	'')	pth=`getconf PATH 2>/dev/null`
+	'')	pth=''
 		case $pth in
 		'')	pth="/bin /usr/bin" ;;
 		*:*)	pth=`echo "$pth" | sed 's/:/ /g'` ;;
@@ -772,6 +772,7 @@ case `(getopts '[-][123:xyz]' opt --xyz; echo 0$opt) 2>/dev/null` in
 	output file. See \bproto\b(1).]
 [P:pragma?Emits \b#pragma\b \atext\a at the top of the output file.]:[text]
 [r:regress?Massage output for regression testing.]
+[R:root?alternate root.]:[dir]
 [s:shell?Sets the internal shell name to \aname\a. Used for debugging
 	Bourne shell compatibility (otherwise \biffe\b uses \aksh\a constructs
 	if available). The supported names are \bksh\b, \bbsh\b, \bbash\b, and
@@ -1084,6 +1085,7 @@ case `(getopts '[-][123:xyz]' opt --xyz; echo 0$opt) 2>/dev/null` in
 		p)	set="$set set prototyped :" ;;
 		P)	set="$set set pragma $OPTARG :" ;;
 		r)	set="$set set regress :" ;;
+		R)	set="$set set altroot $OPTARG :" ;;
 		s)	set="$set set shell $OPTARG :" ;;
 		S)	set="$set set static $OPTARG :" ;;
 		O)	set="$set set stdio $OPTARG :" ;;
@@ -1603,6 +1605,12 @@ do	case $in in
 		esac
 		case $op in
 		all)	all=1
+			continue
+			;;
+		altroot) case $arg in
+			""|-)	altroot= ;;
+			*)	altroot="$arg" ;;
+			esac
 			continue
 			;;
 		cc)	occ=
@@ -3614,7 +3622,7 @@ int main(){printf("hello");return(0);}
 						*)	d=/$j s=_$j ;;
 						esac
 						for i in bin etc ucb
-						do	if	test -f $d/$i/$a
+						do	if	test -f $altroot/$d/$i/$a
 							then	case $k in
 								1)	k=0
 									case $M in
