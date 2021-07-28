@@ -30,6 +30,7 @@ mkdir -p $ast/src/lib
 for lib in libast libpp libdll libsum libcmd; do
 	echo "Syncing $lib"
 	$rsync src/lib/$lib/ $ast/src/lib/$lib/
+	rm -rf $ast/src/lib/$lib/man
 done
 
 mkdir -p $ast/src/cmd
